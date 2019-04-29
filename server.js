@@ -59,8 +59,15 @@ app.post('/excel-query',async (req, res) => {
 
 	try {
 		let query = req.body.query;
+
 		if(query.toLowerCase().indexOf('fetch first') == -1){
 			query = query + ' fetch first 10000 rows only'
+		}
+
+		if(req.body.columns.length > 0){
+			if(query.toLowerCase().indexOf('select * from') > -1) {
+				query = query.replace('select * from', 'select ' + req.body.columns.join(', ') + ' from')
+			}
 		}
 		let result = await connection.execute(
 			query,

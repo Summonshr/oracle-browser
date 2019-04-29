@@ -72,18 +72,22 @@ class App extends React.Component {
 	}
 
 	downloadQuery() {
+
 		this.setState({ loading: true })
+
 		var name = prompt('Enter file name:')
+
 		if (!name) {
 			this.setState({ loading: false })
 			return;
 		}
+
 		Axios
 			.request({
 				url: 'http://localhost:3030/excel-query',
 				method: 'post',
 				responseType: 'blob',
-				data: { query: this.state.query }
+				data: { query: this.state.query, columns: this.state.metaColumns }
 			})
 			.then(({ data }) => {
 				this.setState({ loading: false })
@@ -207,8 +211,8 @@ class App extends React.Component {
 		return (<div className="w-full mx-auto flex flex-wrap">
 			<div className="w-1/6 p-2 border-r border-grey-light min-h-screen">
 				<ul className="list-reset">
-					<li><input className="p-2 border-b-2 w-full outline-none" value={this.state.metaSearch} onChange={e=>this.setState({metaSearch: e.target.value})}/></li>
-					{this.state.metaData && this.getColumns().map(e=><li key={e} className={"p-2 w-full cursor-pointer " + (this.state.metaColumns.includes(e) ? 'bg-green-lightest text-green-darkest' : '')} onClick={()=>this.pushColumn(e)}>{e}</li>)}
+					<li><input className="p-2 border-b-2 w-full outline-none" placeholder="Filter columns" value={this.state.metaSearch} onChange={e=>this.setState({metaSearch: e.target.value})}/></li>
+					{this.state.metaData && this.getColumns().map(e=><li key={e} className={"p-2 w-full cursor-pointer " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')} onClick={()=>this.pushColumn(e)}>{e}</li>)}
 				</ul>
 			</div>
 			<div className="w-5/6 p-2">
