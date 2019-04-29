@@ -3,7 +3,7 @@ const json2xls = require('json2xls')
 const app = express()
 const port = 3030
 var oracledb = require('oracledb');
-var mypw = 'square999'
+var credentials = require('./credentials.js')
 var bodyParser = require('body-parser');
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -17,11 +17,7 @@ app.use(express.urlencoded({limit: '50mb'}));
 
 app.post('/select', async (req, response) => {
 
-	let connection = await oracledb.getConnection({
-		user: "custom",
-		password: mypw,
-		connectString: "10.2.3.31/danphe"
-	});
+	let connection = await oracledb.getConnection(credentials);
 
 	try {
 		let query = req.body.query;
