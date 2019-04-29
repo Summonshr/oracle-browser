@@ -47,11 +47,7 @@ app.post('/excel',function(req, res) {
 });
 
 app.post('/excel-query',async (req, res) => {
-	let connection = await oracledb.getConnection({
-		user: "custom",
-		password: mypw,
-		connectString: "10.2.3.31/danphe"
-	});
+	let connection = await oracledb.getConnection(credentials);
 
 	try {
 		let query = req.body.query;
