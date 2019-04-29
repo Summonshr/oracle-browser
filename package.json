@@ -3,9 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "algoliasearch": "^3.32.1",
+    "axios": "^0.18.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "json2xls": "^0.1.2",
+    "lodash": "^4.17.11",
+    "oracledb": "^3.1.2",
+    "rc-pagination": "^1.17.14",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.0"
+    "react-loading": "^2.0.3",
+    "react-paginate": "^6.3.0",
+    "react-scripts": "3.0.0",
+    "react-summernote": "^2.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

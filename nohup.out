@@ -1,0 +1,17 @@
+yarn run v1.15.2
+$ react-scripts start
+^Cyarn run v1.15.2
+$ react-scripts start
+Starting the development server...
+
+Compiled with warnings.
+
+./src/App.js
+  Line 150:  The href attribute is required for an anchor to be keyboard accessible. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid
+  Line 166:  The href attribute is required for an anchor to be keyboard accessible. Provide a valid, navigable address as the href value. If you cannot provide an href, but still need the element to resemble a link, use a button and change it with appropriate styles. Learn more: https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/anchor-is-valid.md  jsx-a11y/anchor-is-valid
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+error Command failed with exit code 3221225786.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

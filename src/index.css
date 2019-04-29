@@ -8,7 +8,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+.search-input{
+  border: 0;
+  padding: 5px;
+  min-width: 300px;
+  border-style: outset;
+  background: rgb(255, 170, 170);
+  border-bottom: 2px solid rgb(99, 96, 96);
+}
+
+.p-10{
+  padding: 2rem;
 }
