@@ -46,3 +46,23 @@ textarea {
   -o-user-select: none;
   user-select: none;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #e9e9e9; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #313131; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #222222; 
+}

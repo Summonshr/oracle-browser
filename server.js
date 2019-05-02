@@ -5,15 +5,20 @@ const port = 3030
 var oracledb = require('oracledb');
 var credentials = require('./credentials.js')
 var bodyParser = require('body-parser');
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+var compression = require('compression')
+app.use(compression())
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 var cors = require('cors')
 
-app.use(cors())
+app.use(cors());
+
 oracledb.outFormat = oracledb.OBJECT;
 
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
 
 app.post('/select', async (req, response) => {
 
@@ -21,20 +26,25 @@ app.post('/select', async (req, response) => {
 
 	try {
 		let query = req.body.query;
-		if(query.toLowerCase().indexOf('fetch first') == -1){
-			query = query + ' fetch first 100 rows only'
+
+		if (query.toLowerCase().indexOf('fetch first') == -1) {
+			query = query + ' fetch first 500 rows only'
 		}
+
 		let result = await connection.execute(
 			query,
 			[],
 		);
+
 		return response.json(result);
 	} catch (err) {
+		return response.status(500).json({ error: 'Error in query' })
 	} finally {
 		if (connection) {
 			try {
 				await connection.close();
 			} catch (err) {
+
 			}
 		}
 	}
@@ -42,22 +52,18 @@ app.post('/select', async (req, response) => {
 
 app.use(json2xls.middleware);
 
-app.post('/excel',function(req, res) {
-    return res.xls('data.xlsx', req.body.data);
+app.post('/excel', function (req, res) {
+	return res.xls('data.xlsx', req.body.data);
 });
 
-app.post('/excel-query',async (req, res) => {
+app.post('/excel-query', async (req, res) => {
 	let connection = await oracledb.getConnection(credentials);
 
 	try {
 		let query = req.body.query;
 
-		if(query.toLowerCase().indexOf('fetch first') == -1){
-			query = query + ' fetch first 10000 rows only'
-		}
-
-		if(req.body.columns.length > 0){
-			if(query.toLowerCase().indexOf('select * from') > -1) {
+		if (req.body.columns.length > 0) {
+			if (query.toLowerCase().indexOf('select * from') > -1) {
 				query = query.replace('select * from', 'select ' + req.body.columns.join(', ') + ' from')
 			}
 		}
@@ -67,6 +73,7 @@ app.post('/excel-query',async (req, res) => {
 		);
 		return res.xls('data.xlsx', result.rows);
 	} catch (err) {
+		return res.xls('data.xlsx', [{ message: "Error in query" }]);
 	} finally {
 		if (connection) {
 			try {
@@ -81,5 +88,4 @@ app.post('/excel-query',async (req, res) => {
 app.listen(port, (err) => {
 	if (err) {
 	}
-
 })
