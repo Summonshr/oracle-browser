@@ -10,6 +10,7 @@ export default class Table extends React.Component {
             order: 'asc',
             orderBy: '',
             filter: '',
+            no_of_rows: 10
         }
         this.getData = this.getData.bind(this)
         this.download = this.download.bind(this)
@@ -99,8 +100,17 @@ export default class Table extends React.Component {
             {<div className="w-full">
                 <div className="w-full flex flex-wrap justify-between items-center h-12">
                     <div className="flex">
-                        <span className="text-grey-darker">Total rows: </span>
-                        <span className="font-semibold text-green-darker pl-2">{length}</span>
+                        <span className="text-grey-darker leading-loose pr-2">Per Page: </span>
+                        <select className="p-1 border bg-grey-lightest" onChange={event=>this.setState({no_of_rows: event.target.value})} value={this.state.no_of_rows} id="">
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                            <option value={500}>500</option>
+                        </select>
+                        <span className="font-semibold text-green-darker pl-2">
+
+                        </span>
                     </div>
                     <div className="flex">
                         <span>
@@ -118,24 +128,25 @@ export default class Table extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.splice(this.state.page * 10, 10).map((c,i) => <tr key={i}>{Object.keys(c).map((e,i) => <td key={i}>{(c[e] || '').toString()}</td>)}</tr>)}
+                                {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c,i) => <tr key={i}>{Object.keys(c).map((e,i) => <td key={i}>{(c[e] || '').toString()}</td>)}</tr>)}
                             </tbody>
                         </table>
                     </div>
-                    <div className="w-full">
-                         <div className="paginate-div w-full">
+                    <div className="w-full flex flex-wrap justify-between mt-2">
+                         <div className="paginate-div">
                             <ReactPaginate
                                 initialPage={0}
                                 forcePage={this.state.page || 0}
                                 onPageChange={(page) => this.setState({ page: page.selected })}
                                 marginPagesDisplayed={2}
                                 pageRangeDisplayed={5}
-                                containerClassName={'pagination'}
+                                containerClassName={'pagination m-0 p-0'}
                                 subContainerClassName={'pages pagination'}
                                 activeClassName={'active'}
-                                pageCount={Math.ceil(rows.length / 10) + 1}
+                                pageCount={Math.ceil(rows.length / this.state.no_of_rows) + 1}
                             />
                         </div>
+                        <span className="leading-loose">Total rows: {length}</span>
                     </div>
                     </>}
                     {length == 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden"><span className="p-4 text-red-darker">

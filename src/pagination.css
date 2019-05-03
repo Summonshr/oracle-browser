@@ -69,8 +69,3 @@ li {
     float: left;
     cursor: pointer;
 }
-
-.pagination {
-    margin: 0 auto;
-    position: absolute;
-}

@@ -176,7 +176,7 @@ class App extends React.Component {
 		let rows = total.splice(this.state.page * 10, 10);
 
 		return <div className="w-full mx-auto flex flex-wrap relative">
-			<details className="absolute pin-r mr-4 mt-4  pr-4 bg-green-lighter">
+			<details className="absolute pin-r mr-4 mt-2  pr-2 bg-green-lighter">
 				<summary className="cursor-pointer outline-none bg-green-dark p-2 w-full">
 				☰
 				</summary>
@@ -192,9 +192,9 @@ class App extends React.Component {
 			</div>
 			<div className="w-5/6 p-2">
 				<div className="w-full flex flex-wrap justify-between">
-					<textarea rows="5" onKeyUp={this.dispatch} className="wickEnabled w-full border-2 mt-2 max-w-xl" onChange={this.load} value={this.state.query}></textarea>
-					<div className="w-32 flex justify-around inline items-center">
-						<a title="Download by query" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="/#" onClick={this.downloadQuery}>⇓</a>
+					<textarea rows="5" onKeyUp={this.dispatch} className="wickEnabled border-2 w-5/6" onChange={this.load} value={this.state.query}></textarea>
+					<div className="w-1/6 flex px-2">
+						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center" href="/#" onClick={this.downloadQuery}>⇓</a>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -210,4 +210,3 @@ class App extends React.Component {
 }
 
 export default App;
-

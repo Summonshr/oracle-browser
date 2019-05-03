@@ -5,7 +5,25 @@ const port = 3030
 var oracledb = require('oracledb');
 var credentials = require('./credentials.js')
 var bodyParser = require('body-parser');
-var compression = require('compression')
+var compression = require('compression');
+const flatCache = require('flat-cache')
+let cache = flatCache.load('productsCache');
+let flatCacheMiddleware = (req,res, next) => {
+	let key =  '__express__' + Math.ceil((new Date).getTime() / (60*100)) + req.body.query
+	let cacheContent = cache.getKey(key);
+	if( !req.body.live && cacheContent){
+		console.log('from cache')
+		res.send( cacheContent );
+	} else {
+		res.sendResponse = res.send
+		res.send = (body) => {
+			cache.setKey(key,body);
+			cache.save();
+			res.sendResponse(body)
+		}
+		next()
+	}
+};
 app.use(compression())
 
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -20,7 +38,7 @@ oracledb.outFormat = oracledb.OBJECT;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
-app.post('/select', async (req, response) => {
+app.post('/select',flatCacheMiddleware,  async (req, response) => {
 
 	let connection = await oracledb.getConnection(credentials);
 
