@@ -1,26 +1,9 @@
 import React from 'react';
-import './tailwind.css';
-import './App.css';
-import './pagination.css'
 import Axios from 'axios';
-import ReactPaginate from 'react-paginate';
 import ReactLoading from 'react-loading';
 import _ from 'lodash';
+import Table from './Table';
 import { initial } from './config.js';
-
-Object.prototype.toString = function () {
-	return JSON.stringify(this)
-}
-
-const excel = (data, name) => {
-	const downloadUrl = window.URL.createObjectURL(new Blob([data]));
-	const link = document.createElement('a');
-	link.href = downloadUrl;
-	link.setAttribute('download', name + '.xlsx'); //any other extension
-	document.body.appendChild(link);
-	link.click();
-	link.remove();
-}
 
 const funcs = [
 	'load',
@@ -28,7 +11,6 @@ const funcs = [
 	'getBody',
 	'setPageChange',
 	'dispatch',
-	'download',
 	'downloadQuery',
 	'pushColumn',
 	'getColumns',
@@ -43,13 +25,13 @@ let attempt = false;
 const pathname = window.location.pathname.replace('/', '') || 'default'
 
 const store = {
-	save(key, value) {
-		value.rows = [];
-		localStorage.setItem(key, JSON.stringify(value))
-	},
-	retrieve(key){
-		return JSON.parse(localStorage.getItem(key))
-	}
+    save(key, value) {
+        value.rows = [];
+        localStorage.setItem(key, JSON.stringify(value))
+    },
+    retrieve(key) {
+        return JSON.parse(localStorage.getItem(key))
+    }
 }
 
 const local = store.retrieve(pathname)
@@ -88,10 +70,6 @@ class App extends React.Component {
 		});
 	}
 
-	download() {
-		this.queryForDownload('http://localhost:3030/excel', { data: this.getBody() })
-	}
-
 	showLoading() {
 		this.setState({ ...initial, loading: true })
 	}
@@ -100,31 +78,10 @@ class App extends React.Component {
 		this.setState({ loading: false })
 	}
 
-	queryForDownload(url, data) {
-		this.showLoading()
-
-		var name = prompt('Enter file name:')
-
-		if (!name) {
-			this.hideLoading()
-			return;
-		}
-
-		Axios
-			.request({
-				url: url,
-				method: 'post',
-				responseType: 'blob',
-				data: data
-			})
-			.then(({ data }) => {
-				this.hideLoading()
-				excel(data, name)
-			});
-	}
+	queryForDownload = window.queryForDownload.bind(this)
 
 	downloadQuery() {
-		this.queryForDownload('http://localhost:3030/excel-query', { query: this.state.query, columns: this.state.metaColumns })
+		this.queryForDownload('http://10.10.154.215:3030/excel-query', { query: this.state.query, columns: this.state.metaColumns })
 	}
 
 	fetch() {
@@ -135,7 +92,7 @@ class App extends React.Component {
 
 		attempt = Axios.CancelToken.source();
 
-		Axios.post('http://localhost:3030/select', {
+		Axios.post('http://10.10.154.215:3030/select', {
 			query: this.state.query
 		}, { cancelToken: attempt.token }).then(res => {
 			this.setState({
@@ -143,7 +100,7 @@ class App extends React.Component {
 				initial: false,
 				rows: res.data.rows,
 				metaColumns:[],
-				metaData: res.data.metaData,
+				metaData: _.uniqBy(res.data.metaData, 'name'),
 			});
 			attempt = false;
 		}).catch((err) => {
@@ -170,21 +127,9 @@ class App extends React.Component {
 
 	}
 
-	setFilter(event) {
-		this.setState({
-			filter: event.target.value
-		})
-	}
-
 	getBody() {
 
 		let results = [...this.state.rows];
-
-		if (this.state.orderBy) {
-			results = _.orderBy(results, (e) => {
-				return (e[this.state.orderBy] || '').toString().padStart(100, '0')
-			}, this.state.order)
-		}
 
 		if (this.state.metaColumns.length > 0) {
 			results = results.map(o => {
@@ -195,26 +140,7 @@ class App extends React.Component {
 				return r;
 			})
 		}
-
-		if (this.state.filter) {
-			if (this.state.filter.indexOf(':') > -1) {
-				let arr = this.state.filter.split(':')
-				let key = arr[0]
-				let value = arr[1]
-				results = results.filter(r => {
-					return Object.keys(r).filter(k => {
-						return r[k] && k.toLowerCase() === key.toLowerCase() && r[k].toString().toLowerCase().indexOf(value.toLowerCase()) > -1
-					}).length > 0;
-				})
-			} else {
-				results = results.filter(r => {
-					return Object.keys(r).filter(k => {
-						return r[k] && r[k].toString().toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1
-					}).length > 0;
-				})
-			}
-		}
-
+		
 		return results
 	}
 
@@ -247,11 +173,9 @@ class App extends React.Component {
 	render() {
 		let total = this.getBody();
 
-		let length = total.length;
-
 		let rows = total.splice(this.state.page * 10, 10);
 
-		return (<div className="w-full mx-auto flex flex-wrap relative">
+		return <div className="w-full mx-auto flex flex-wrap relative">
 			<details className="absolute pin-r mr-4 mt-4  pr-4 bg-green-lighter">
 				<summary className="cursor-pointer outline-none bg-green-dark p-2 w-full">
 				☰
@@ -279,47 +203,9 @@ class App extends React.Component {
 						<ReactLoading type='bubbles' color='red' />
 					</div>
 				</div>}
-				{!this.state.initial && !this.state.loading && <div className="w-full overflow-x-scroll">
-					<div className="w-full flex flex-wrap justify-between items-center h-12">
-						<div className="flex">{rows.length > 0 && <><span className="text-grey-darker">Total rows: </span><span className="font-semibold text-green-darker pl-2">{length}</span></>}</div>
-						<div className="flex">
-							<span>
-								<input className="w-64 p-2 bg-grey-lighter mr-2" placeholder="filter the contents" onChange={this.setFilter.bind(this)} value={this.state.filter} />
-							</span>
-							<a title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="/#" onClick={this.download}>⇓</a>
-						</div>
-					</div>
-					{rows.length > 0 && <div>
-						<table className="result mt-1">
-							<thead>
-								<tr>
-									{this.getHeaders().map(e => <th key={e} className="cursor-pointer do-not-select" onClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}><span>{e}</span><span className="pl-2">{this.state.orderBy === e && (this.state.order === 'asc' ? '↑' : '↓')}</span></th>)}
-								</tr>
-							</thead>
-							<tbody>
-								{rows.map((e, i) => {
-									return <tr key={i}>{Object.keys(e).map(k => <td key={k}>{e[k] && e[k].toString()}</td>)}</tr>
-								})}
-							</tbody>
-						</table>
-						{total.length > 0 && <div className="paginate-div">
-							<ReactPaginate
-								initialPage={0}
-								onPageChange={this.setPageChange}
-								marginPagesDisplayed={2}
-								pageRangeDisplayed={5}
-								containerClassName={'pagination'}
-								subContainerClassName={'pages pagination'}
-								activeClassName={'active'}
-								pageCount={Math.ceil(total.length / 10) + 1}
-							/>
-						</div>}
-					</div>}
-					{rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden"><span className="p-4 text-red-darker">
-						{this.state.error || 'No rows fetched.'}</span></div>}
-				</div>}
+				{!this.state.loading && <Table data={this.getBody()} />}
 			</div>
-		</div>);
+		</div>
 	}
 }
 
