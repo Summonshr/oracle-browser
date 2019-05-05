@@ -1,43 +1,80 @@
-const express = require('express')
-const json2xls = require('json2xls')
-const app = express()
-const port = 3030
+const express = require('express');
+const json2xls = require('json2xls');
+const app = express();
+const port = 3030;
 var oracledb = require('oracledb');
-var credentials = require('./credentials.js')
+var credentials = require('./credentials.js');
 var bodyParser = require('body-parser');
 var compression = require('compression');
-const flatCache = require('flat-cache')
-let cache = flatCache.load('productsCache');
-let flatCacheMiddleware = (req,res, next) => {
-	let key =  '__express__' + Math.ceil((new Date).getTime() / (60*100)) + req.body.query
+const flatCache = require('flat-cache');
+const fileUpload = require('express-fileupload');
+const fs = require('fs');
+const cache = flatCache.load('productsCache');
+const flatCacheMiddleware = (req, res, next) => {
+	let key = '__express__' + Math.ceil((new Date).getTime() / (60 * 100)) + req.body.query
 	let cacheContent = cache.getKey(key);
-	if( !req.body.live && cacheContent){
-		res.send( cacheContent );
+	if (!req.body.live && cacheContent) {
+		res.send(cacheContent);
 	} else {
 		res.sendResponse = res.send
 		res.send = (body) => {
-			cache.setKey(key,body);
+			cache.setKey(key, body);
 			cache.save();
 			res.sendResponse(body)
 		}
 		next()
 	}
 };
-app.use(compression())
 
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-var cors = require('cors')
+var cors = require('cors');
 
 app.use(cors());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(compression());
+app.use(fileUpload({
+	createParentPath: true,
+	limits: {
+		fileSize: 50 * 1024 * 1024,
+		useTempFiles: true,
+		tempFileDir: '/tmp/'
+	}
+}));
+app.use(express.urlencoded({ limit: '50mb' }));
 
 oracledb.outFormat = oracledb.OBJECT;
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
+app.post('/upload', async (req, res) => {
+	if (Object.keys(req.files).length == 0) {
+		return res.status(400).send('No files were uploaded.');
+	}
+	let all = Object.values(req.files);
+	let completed = 0;
+	
+	let dir = ['./files',	req.body.foracid, req.body.type].join('/');
+	
+	if (!fs.existsSync(dir)){
+		fs.mkdirSync(dir, {recursive: true});
+	}
 
-app.post('/select',flatCacheMiddleware,  async (req, response) => {
+	all.map(f => f.mv([dir, f.name].join('/'), function (a, b) {
+		completed = completed + 1;
+		all.length == completed && res.json({ message: "WORKING" })
+	}));
+});
+
+app.post('/file-list', (req, res) => {
+	fs.readdir(['files',req.body.foracid, req.body.type].join('/'), (err, files) => {
+		if(err){
+			return res.json(['No file yet.'])
+		}
+		return res.json(files)
+	});
+});
+
+app.post('/select', flatCacheMiddleware, async (req, response) => {
 
 	let connection = await oracledb.getConnection(credentials);
 
@@ -101,8 +138,15 @@ app.post('/excel-query', async (req, res) => {
 	}
 
 });
-
+app.get('/files/*', (req, res)=>{
+	let filename = decodeURI(req.url.replace('/files/','files/'));
+	var stream = fs.createReadStream(filename);
+	res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
+	res.setHeader('Content-type', 'application/pdf');
+	stream.pipe(res);
+} )
 app.listen(port, (err) => {
 	if (err) {
+		console.log(err)
 	}
 })

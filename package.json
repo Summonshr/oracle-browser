@@ -6,8 +6,10 @@
     "algoliasearch": "^3.32.1",
     "axios": "^0.18.0",
     "axios-cache-adapter": "^2.3.0",
+    "connect-busboy": "^0.0.2",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "express-fileupload": "^1.1.4",
     "flat-cache": "^2.0.1",
     "json2xls": "^0.1.2",
     "lodash": "^4.17.11",
@@ -24,6 +26,7 @@
     "react-summernote": "^2.0.0"
   },
   "scripts": {
+    "serve": "nodemon server.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

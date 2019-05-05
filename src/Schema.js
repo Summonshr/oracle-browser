@@ -121,7 +121,7 @@ class Schema extends React.Component {
                         <li className="w-full border-b"><input className="w-full p-2 bg-green-lightest" value={this.state.filterTable} onChange={event => this.setState({ filterTable: event.target.value })} placeholder="Filter tables" /></li>
                         {this.state.tables.filter(t => {
                             if (this.state.filterTable) {
-                                return t.toLowerCase().indexOf(this.state.filterTable.toLowerCase())
+                                return t.TABLE_NAME.toLowerCase().indexOf(this.state.filterTable.toLowerCase()) > -1
                             }
                             return true;
                         }).map(e => <li key={e} onClick={() => this.loadColumns(e.TABLE_NAME)} className={"w-full bg-grey-lightest hover:bg-green-lighter border-b p-2 " + (this.state.table === e.TABLE_NAME && ' bg-green-light')}>{e.TABLE_NAME}</li>)}
