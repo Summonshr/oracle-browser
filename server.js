@@ -12,7 +12,6 @@ let flatCacheMiddleware = (req,res, next) => {
 	let key =  '__express__' + Math.ceil((new Date).getTime() / (60*100)) + req.body.query
 	let cacheContent = cache.getKey(key);
 	if( !req.body.live && cacheContent){
-		console.log('from cache')
 		res.send( cacheContent );
 	} else {
 		res.sendResponse = res.send
@@ -71,7 +70,7 @@ app.post('/select',flatCacheMiddleware,  async (req, response) => {
 app.use(json2xls.middleware);
 
 app.post('/excel', function (req, res) {
-	return res.xls('data.xlsx', req.body.data);
+	return res.xls('data.xls', req.body.data);
 });
 
 app.post('/excel-query', async (req, res) => {
@@ -89,9 +88,9 @@ app.post('/excel-query', async (req, res) => {
 			query,
 			[],
 		);
-		return res.xls('data.xlsx', result.rows);
+		return res.xls('data.xls', result.rows);
 	} catch (err) {
-		return res.xls('data.xlsx', [{ message: "Error in query" }]);
+		return res.xls('data.xls', [{ message: "Error in query" }]);
 	} finally {
 		if (connection) {
 			try {
