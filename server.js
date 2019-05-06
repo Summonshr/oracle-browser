@@ -1,15 +1,19 @@
+const port = 3030;
+const app = express();
 const express = require('express');
 const json2xls = require('json2xls');
-const app = express();
-const port = 3030;
+
 var oracledb = require('oracledb');
-var credentials = require('./credentials.js');
 var bodyParser = require('body-parser');
 var compression = require('compression');
-const flatCache = require('flat-cache');
-const fileUpload = require('express-fileupload');
+var credentials = require('./credentials.js');
+
 const fs = require('fs');
+const cors = require('cors');
+const flatCache = require('flat-cache');
 const cache = flatCache.load('productsCache');
+const fileUpload = require('express-fileupload');
+
 const flatCacheMiddleware = (req, res, next) => {
 	let key = '__express__' + Math.ceil((new Date).getTime() / (60 * 100)) + req.body.query
 	let cacheContent = cache.getKey(key);
@@ -26,9 +30,6 @@ const flatCacheMiddleware = (req, res, next) => {
 	}
 };
 
-
-var cors = require('cors');
-
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -42,6 +43,7 @@ app.use(fileUpload({
 		tempFileDir: '/tmp/'
 	}
 }));
+
 app.use(express.urlencoded({ limit: '50mb' }));
 
 oracledb.outFormat = oracledb.OBJECT;
@@ -73,6 +75,31 @@ app.post('/file-list', (req, res) => {
 		return res.json(files)
 	});
 });
+
+app.post('/account-details', flatCacheMiddleware), async(req,response) => {
+	let connection = await oracledb.getConnection(credentials);
+
+	try {
+		let query =	"Select foracid, schm_code, acct_name from tbaadm.gam where del_flg = 'N' and acct_cls_flg='N' and schm_type = 'LAA' and acct_ownership ='C' and foracid like '%" + req.body.search + "%'"
+
+		let result = await connection.execute(
+			query,
+			[],
+		);
+
+		return response.json(result);
+	} catch (err) {
+		return response.status(500).json({ error: 'Error in query' })
+	} finally {
+		if (connection) {
+			try {
+				await connection.close();
+			} catch (err) {
+
+			}
+		}
+	}
+})
 
 app.post('/select', flatCacheMiddleware, async (req, response) => {
 
@@ -144,7 +171,8 @@ app.get('/files/*', (req, res)=>{
 	res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
 	res.setHeader('Content-type', 'application/pdf');
 	stream.pipe(res);
-} )
+})
+
 app.listen(port, (err) => {
 	if (err) {
 		console.log(err)
