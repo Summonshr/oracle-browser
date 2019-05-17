@@ -2,18 +2,21 @@ import React from 'react';
 import Axios from 'axios';
 import ReactLoading from 'react-loading';
 import _ from 'lodash';
-import Table from './Table';
+import Display from './Display';
 import { initial } from './config.js';
-
+import { Controlled as CodeMirror } from 'react-codemirror2'
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/mode/sql/sql';
 const funcs = [
 	'load',
 	'fetch',
 	'getBody',
 	'setPageChange',
-	'dispatch',
 	'downloadQuery',
 	'pushColumn',
 	'getColumns',
+	'getCount',
 	'showLoading',
 	'hideLoading',
 	'componentDidUpdate',
@@ -25,18 +28,16 @@ let attempt = false;
 const pathname = window.location.pathname.replace('/', '') || 'default'
 
 const store = {
-    save(key, value) {
-        value.rows = [];
-        localStorage.setItem(key, JSON.stringify(value))
-    },
-    retrieve(key) {
-        return JSON.parse(localStorage.getItem(key))
-    }
+	save(key, value) {
+		value.rows = [];
+		localStorage.setItem(key, JSON.stringify(value))
+	},
+	retrieve(key) {
+		return JSON.parse(localStorage.getItem(key))
+	}
 }
 
 const local = store.retrieve(pathname)
-
-const past = Object.keys(localStorage)
 
 class App extends React.Component {
 
@@ -46,22 +47,24 @@ class App extends React.Component {
 			...initial,
 			initial: true,
 			query: 'select * from tbaadm.gam',
+			cache: false,
 		};
 
 		funcs.filter(f => {
-			this[f] = this[f].bind(this)
+			this[f] = this[f].bind(this);
+			return '';
 		})
 	}
 
 	componentDidUpdate() {
-		store.save(pathname, {...this.state})
+		store.save(pathname, { ...this.state })
 	}
 
 	componentDidMount() {
 		local && this.setState({
 			...local,
-			loading: false
-		})
+			loading: false,
+		});
 	}
 
 	load(event) {
@@ -71,7 +74,7 @@ class App extends React.Component {
 	}
 
 	showLoading() {
-		this.setState({ ...initial, loading: true })
+		this.setState({ loading: true })
 	}
 
 	hideLoading() {
@@ -92,28 +95,49 @@ class App extends React.Component {
 
 		attempt = Axios.CancelToken.source();
 
+		let query = this.state.query;
+
+		if(this.state.cache){
+			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ','SELECT /*+RESULT_CACHE*/ ')
+		}
+
 		Axios.post('http://10.10.154.215:3030/select', {
-			query: this.state.query
+			query
 		}, { cancelToken: attempt.token }).then(res => {
 			this.setState({
 				...initial,
 				initial: false,
 				rows: res.data.rows,
-				metaColumns:[],
+				metaColumns: [],
 				metaData: _.uniqBy(res.data.metaData, 'name'),
 			});
 			attempt = false;
 		}).catch((err) => {
 			if (!Axios.isCancel(err)) {
-				this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
 			}
 		})
 	}
 
-	dispatch(e) {
-		if (e.ctrlKey && e.keyCode === 13) {
-			this.fetch();
-		}
+	getCount() {
+		this.showLoading()
+
+		attempt && attempt.cancel();
+
+		attempt = Axios.CancelToken.source();
+
+		Axios.post('http://10.10.154.215:3030/select', {
+			query: `select count(1) count from ( ${this.state.query} )`
+		}, { cancelToken: attempt.token }).then(res => {
+			alert('Total rows: ' + res.data.rows[0].COUNT)
+			this.hideLoading();
+			attempt = false;
+		}).catch((err) => {
+			if (!Axios.isCancel(err)) {
+				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+			}
+			this.hideLoading()
+		})
 	}
 
 	getHeaders() {
@@ -129,6 +153,10 @@ class App extends React.Component {
 
 	getBody() {
 
+		if (!this.state.rows) {
+			return [];
+		}
+
 		let results = [...this.state.rows];
 
 		if (this.state.metaColumns.length > 0) {
@@ -136,12 +164,14 @@ class App extends React.Component {
 				let r = {}
 				this.state.metaColumns.filter(e => {
 					r[e] = o[e]
+
+					return '';
 				});
 				return r;
 			})
 		}
-		
-		return results
+
+		return results || [];
 	}
 
 	setPageChange(page) {
@@ -170,31 +200,43 @@ class App extends React.Component {
 		return meta;
 	}
 
+
+
 	render() {
-		let total = this.getBody();
-
-		let rows = total.splice(this.state.page * 10, 10);
-
 		return <div className="w-full mx-auto flex flex-wrap relative">
-			<details className="absolute pin-r mr-4 mt-2  pr-2 bg-green-lighter">
-				<summary className="cursor-pointer outline-none bg-green-dark p-2 w-full">
-				☰
-				</summary>
-				<ol className="list-reset">
-					{past.map(e=><li key={e} className="w-full p-2 hover:bg-green-lightest hover:text-green-darker"><a className="no-underline text-green-darker w-full block" href={"/"+e}>{e}</a></li>)}
-				</ol>
-			</details>
-			<div className="w-1/6 p-2 border-r border-grey-light h-screen overflow-y-scroll">
+			<div className="w-1/6 p-2 border-r border-grey-light h-screen overflow-y-auto">
 				<ul className="list-reset ">
-					<li className="w-full mb-1"><input className="p-2 border-b-2 w-full outline-none" placeholder="Filter columns" value={this.state.metaSearch} onChange={e => this.setState({ metaSearch: e.target.value })} /></li>
-					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"p-2 w-full cursor-pointer " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')} onClick={() => this.pushColumn(e)}>{e}</li>)}
+					<li className="w-full mb-1 flex justify-between">
+						<input className="p-2 border-b-2 w-full outline-none" placeholder="Filter columns" value={this.state.metaSearch} onChange={e => this.setState({ metaSearch: e.target.value })} />
+					</li>
+					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"w-full cursor-pointer flex flex-wrap justify-between " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')}><a className="p-2 block no-underline text-grey-darker flex-grow" href="#" onClick={() => this.pushColumn(e)}>{e}</a></li>)}
 				</ul>
 			</div>
-			<div className="w-5/6 p-2">
+			<div className="w-5/6 p-2 h-32 h-screen overflow-y-auto">
 				<div className="w-full flex flex-wrap justify-between">
-					<textarea rows="5" onKeyUp={this.dispatch} className="wickEnabled border-2 w-5/6" onChange={this.load} value={this.state.query}></textarea>
+					<CodeMirror
+						className="w-5/6"
+						options={{
+							mode: 'sql',
+							theme: 'material',
+							lineNumbers: true
+						}}
+						value={this.state.query}
+						onKeyUp={(editor, e, value) => {
+							if (e.ctrlKey && e.keyCode === 13) {
+								this.fetch();
+							}
+						}}
+						onBeforeChange={(editor, data, query) => {
+							this.setState({ query });
+						}}
+						onChange={(editor, data, value) => {
+						}}
+					/>
 					<div className="w-1/6 flex px-2">
-						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center" href="/#" onClick={this.downloadQuery}>⇓</a>
+						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.downloadQuery}>⇓</a>
+						<a title="Display count" className="block cursor-pointer bg-green-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.getCount}>||̸||</a>
+						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={()=>{this.setState({cache: !this.state.cache})}}>🗲</a>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -203,7 +245,7 @@ class App extends React.Component {
 						<ReactLoading type='bubbles' color='red' />
 					</div>
 				</div>}
-				{!this.state.loading && <Table data={this.getBody()} />}
+				{!this.state.loading && <Display error={this.state.error} data={this.getBody()} />}
 			</div>
 		</div>
 	}

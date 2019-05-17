@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import Axios from 'axios';
 import ReactLoading from 'react-loading';
-import Table from './Table';
+import Display from './Display';
 
 const funcs = [
     'componentDidMount',
@@ -37,6 +37,7 @@ class Schema extends React.Component {
 
         funcs.filter(f => {
             this[f] = this[f].bind(this)
+            return '';
         })
     }
 
@@ -129,7 +130,7 @@ class Schema extends React.Component {
                 </div>
             </div>
             <div className="w-2/3 flex flex-wrap overflow-y-scroll p-2">
-                {!this.state.loading && <Table data={this.state.columns} />}
+                {!this.state.loading && <Display data={this.state.columns} />}
             </div>
         </div>
     }

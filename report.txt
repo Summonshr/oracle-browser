@@ -1,0 +1,10 @@
+yarn run v1.15.2
+$ react-scripts start
+internal/process/per_thread.js:198
+      throw errnoException(err, 'kill');
+      ^
+
+Error: kill ENOSYS
+    at process.kill (internal/process/per_thread.js:198:13)
+    at process.listener (C:\Users\suman.shrestha3798\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:75676:15)
+    at process.emit (events.js:189:13)

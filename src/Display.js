@@ -1,8 +1,7 @@
 import ReactPaginate from 'react-paginate';
 import React from 'react';
 import _ from 'lodash';
-
-export default class Table extends React.Component {
+export default class Display extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -10,25 +9,23 @@ export default class Table extends React.Component {
             order: 'asc',
             orderBy: '',
             filter: '',
+            hideNull: false,
             no_of_rows: 10
-        }
-        this.getData = this.getData.bind(this)
-        this.download = this.download.bind(this)
+        };
+        this.getData = this.getData.bind(this);
+        this.download = this.download.bind(this);
     }
-
     getData() {
         let results = [...this.props.data];
-
         if (this.state.orderBy.length > 0) {
             results = _.orderBy(results, (e) => {
-                return (e[this.state.orderBy] || '').toString().padStart(50, '0')
-            }, this.state.order)
+                let checker = e[this.state.orderBy] || 0;
+                return checker.toString().padStart(50, '0')
+            }, this.state.order);
         }
-
         if (this.state.filter) {
             if (this.state.filter.indexOf('=') > -1 || this.state.filter.indexOf('<') > -1 || this.state.filter.indexOf('>') > -1) {
-               
-                if(this.state.filter.indexOf('=') > -1) {
+                if (this.state.filter.indexOf('=') > -1) {
                     let arr = this.state.filter.split('=')
                     let key = arr[0]
                     let value = arr[1]
@@ -36,8 +33,8 @@ export default class Table extends React.Component {
                         return Object.keys(r).filter(k => {
                             return r[k] && k.toLowerCase() === key.toLowerCase() && r[k].toString().toLowerCase().indexOf(value.toLowerCase()) > -1
                         }).length > 0;
-                    })
-                } else if (this.state.filter.indexOf('>') > -1){
+                    });
+                } else if (this.state.filter.indexOf('>') > -1) {
                     let arr = this.state.filter.split('>')
                     let key = arr[0]
                     let value = arr[1]
@@ -45,7 +42,7 @@ export default class Table extends React.Component {
                         return Object.keys(r).filter(k => {
                             return r[k] && k.toLowerCase() === key.toLowerCase() && r[k] * 1 > value * 1
                         }).length > 0;
-                    })
+                    });
                 } else if (this.state.filter.indexOf('<') > -1) {
                     let arr = this.state.filter.split('<')
                     let key = arr[0]
@@ -54,63 +51,48 @@ export default class Table extends React.Component {
                         return Object.keys(r).filter(k => {
                             return r[k] && k.toLowerCase() === key.toLowerCase() && r[k] * 1 < value * 1
                         }).length > 0;
-                    })
+                    });
                 }
             } else {
                 results = results.filter(r => {
                     return Object.keys(r).filter(k => {
                         return r[k] && r[k].toString().toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1
                     }).length > 0;
-                })
+                });
             }
         }
-
         return results || [];
     }
-
-
     setFilter(event) {
         this.setState({
             filter: event.target.value
         })
     }
-
     showLoading() {
         this.setState({ loading: true })
     }
-
     hideLoading() {
         this.setState({ loading: false })
     }
-
     queryForDownload = window.queryForDownload.bind(this)
-
-
     download() {
-        this.queryForDownload('http://localhost:3030/excel', { data: this.getData() })
+        this.queryForDownload('http://10.10.154.215:3030/excel', { data: this.getData() })
     }
-
     render() {
-
         let rows = this.getData();
-
         let length = rows.length;
-
         return <div className="flex w-full flex-wrap">
             {<div className="w-full">
                 <div className="w-full flex flex-wrap justify-between items-center h-12">
                     <div className="flex">
                         <span className="text-grey-darker leading-loose pr-2">Per Page: </span>
-                        <select className="p-1 border bg-grey-lightest" onChange={event=>this.setState({no_of_rows: event.target.value})} value={this.state.no_of_rows} id="">
+                        <select className="p-1 border bg-grey-lightest" onChange={event => this.setState({ no_of_rows: event.target.value })} value={this.state.no_of_rows} id="">
                             <option value={10}>10</option>
                             <option value={20}>20</option>
                             <option value={50}>50</option>
                             <option value={100}>100</option>
                             <option value={500}>500</option>
                         </select>
-                        <span className="font-semibold text-green-darker pl-2">
-
-                        </span>
                     </div>
                     <div className="flex">
                         <span>
@@ -128,12 +110,12 @@ export default class Table extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c,i) => <tr key={i}>{Object.keys(c).map((e,i) => <td key={i}>{(c[e] || '').toString()}</td>)}</tr>)}
+                                {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td key={i}>{(c[e] || '(NULL)').toString()}</td>)}</tr>)}
                             </tbody>
                         </table>
                     </div>
                     <div className="w-full flex flex-wrap justify-between mt-2">
-                         <div className="paginate-div">
+                        <div className="paginate-div">
                             <ReactPaginate
                                 initialPage={0}
                                 forcePage={this.state.page || 0}
@@ -148,9 +130,9 @@ export default class Table extends React.Component {
                         </div>
                         <span className="leading-loose">Total rows: {length}</span>
                     </div>
-                    </>}
-                    {length == 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden"><span className="p-4 text-red-darker">
-                            {this.state.error || 'No rows matched.'}</span></div>}
+                </>}
+                {length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden"><span className="p-4 text-red-darker">
+                    {this.props.error || 'No rows matched.'}</span></div>}
             </div>}
         </div>
     }

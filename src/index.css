@@ -8,7 +8,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.search-input{
+.search-input {
   border: 0;
   padding: 5px;
   min-width: 300px;
@@ -17,6 +17,14 @@ body {
   border-bottom: 2px solid rgb(99, 96, 96);
 }
 
-.p-10{
+.p-10 {
   padding: 2rem;
+}
+
+.CodeMirror {
+  height: 135px !important;
+}
+
+.CodeMirror-code>div {
+  line-height: 1.7;
 }
