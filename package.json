@@ -12,7 +12,8 @@
     "react-loading": "^2.0.3",
     "react-paginate": "^6.3.0",
     "react-s-alert": "^1.4.1",
-    "react-scripts": "3.0.0"
+    "react-scripts": "3.0.0",
+    "recharts": "^1.6.0"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -69,7 +69,7 @@ window.queryForDownload = function (url, data) {
 }
 
 setTimeout(() => {
-ReactDOM.render(<> {window.location.pathname === '/schema-browser' ? <Schema /> : <App /> } <Alert position={'bottom'} stack={false} /></>, document.getElementById('root'));
+ReactDOM.render(<> {window.location.pathname === '/schema-browser' ? <Schema /> : <App /> } <Alert offset={'50px'} position={'top-right'} stack={false} /></>, document.getElementById('root'));
 
     serviceWorker.unregister();
 }, 100)

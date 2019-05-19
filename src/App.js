@@ -3,6 +3,7 @@ import Axios from 'axios';
 import ReactLoading from 'react-loading';
 import _ from 'lodash';
 import Display from './Display';
+import Graph from './Graph';
 import { initial } from './config.js';
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
@@ -84,7 +85,7 @@ class App extends React.Component {
 	queryForDownload = window.queryForDownload.bind(this)
 
 	downloadQuery() {
-		this.queryForDownload('http://10.10.154.215:3030/excel-query', { query: this.state.query, columns: this.state.metaColumns })
+		this.queryForDownload('http://localhost:3030/excel-query', { query: this.state.query, columns: this.state.metaColumns })
 	}
 
 	fetch() {
@@ -101,13 +102,14 @@ class App extends React.Component {
 			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ','SELECT /*+RESULT_CACHE*/ ')
 		}
 
-		Axios.post('http://10.10.154.215:3030/select', {
+		Axios.post('http://localhost:3030/select', {
 			query
 		}, { cancelToken: attempt.token }).then(res => {
 			this.setState({
 				...initial,
 				initial: false,
 				rows: res.data.rows,
+				show: this.state.show,
 				metaColumns: [],
 				metaData: _.uniqBy(res.data.metaData, 'name'),
 			});
@@ -126,7 +128,7 @@ class App extends React.Component {
 
 		attempt = Axios.CancelToken.source();
 
-		Axios.post('http://10.10.154.215:3030/select', {
+		Axios.post('http://localhost:3030/select', {
 			query: `select count(1) count from ( ${this.state.query} )`
 		}, { cancelToken: attempt.token }).then(res => {
 			alert('Total rows: ' + res.data.rows[0].COUNT)
@@ -236,7 +238,8 @@ class App extends React.Component {
 					<div className="w-1/6 flex px-2">
 						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.downloadQuery}>⇓</a>
 						<a title="Display count" className="block cursor-pointer bg-green-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.getCount}>||̸||</a>
-						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={()=>{this.setState({cache: !this.state.cache})}}>🗲</a>
+						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2 " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={()=>{this.setState({cache: !this.state.cache})}}>🗲</a>
+						<a title={'Graph: ' + (this.state.show == 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center text-grey-light no-underline " + (this.state.show == 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} href="/#" onClick={()=>{this.setState({show: this.state.show == 'graph' ? 'table' : 'graph'})}}>📊</a>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -245,7 +248,7 @@ class App extends React.Component {
 						<ReactLoading type='bubbles' color='red' />
 					</div>
 				</div>}
-				{!this.state.loading && <Display error={this.state.error} data={this.getBody()} />}
+				{!this.state.loading && (this.state.show == 'table' ? <Display error={this.state.error} data={this.getBody()} /> : <Graph error={this.state.error} data={this.getBody()} />)}
 			</div>
 		</div>
 	}

@@ -6,6 +6,7 @@ export const initial = {
     loading: false,
     orderBy: '',
     order: '',
+    show: 'table',
     metaSearch: '',
     error: '',
     metaColumns:[]
