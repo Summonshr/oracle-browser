@@ -49,6 +49,7 @@ class App extends React.Component {
 			initial: true,
 			query: 'select * from tbaadm.gam',
 			cache: false,
+			offset: false
 		};
 
 		funcs.filter(f => {
@@ -112,6 +113,7 @@ class App extends React.Component {
 				show: this.state.show,
 				metaColumns: [],
 				metaData: _.uniqBy(res.data.metaData, 'name'),
+				offset: false
 			});
 			attempt = false;
 		}).catch((err) => {
@@ -136,7 +138,7 @@ class App extends React.Component {
 			attempt = false;
 		}).catch((err) => {
 			if (!Axios.isCancel(err)) {
-				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+				err.response && this.setState({ loading: false, initial: false, rows: [], ...err.response.data })
 			}
 			this.hideLoading()
 		})
@@ -233,6 +235,7 @@ class App extends React.Component {
 							this.setState({ query });
 						}}
 						onChange={(editor, data, value) => {
+
 						}}
 					/>
 					<div className="w-1/6 flex px-2">
