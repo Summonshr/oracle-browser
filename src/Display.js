@@ -68,7 +68,8 @@ export default class Display extends React.Component {
 
     setFilter(event) {
         this.setState({
-            filter: event.target.value
+            filter: event.target.value,
+            page: 0
         })
     }
 
@@ -141,7 +142,7 @@ export default class Display extends React.Component {
                 </div>
             </>}
             {length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden"><span className="p-4 text-red-darker">
-                {this.props.error || 'No rows matched.'}</span></div>}
+                {'No rows matched.'}</span></div>}
         </div>
     }
 

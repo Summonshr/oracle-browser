@@ -11,7 +11,7 @@ export default class LineCharts extends React.Component {
             <YAxis />
             <Tooltip />
             <Legend />
-            {this.props.keys.splice(1,this.props.keys.length - 1).map((e,i) => <Line type="monotone" key={e} dataKey={e} fill={colors[i]} />)}
+            {this.props.keys.splice(1,this.props.keys.length - 1).map((e,i) => <Line type="monotone" dot={false} key={e} dataKey={e} fill={colors[i]} />)}
         </LineChart>
     }
 }

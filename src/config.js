@@ -7,6 +7,7 @@ export const initial = {
     orderBy: '',
     order: '',
     show: 'table',
+    reload: false,
     metaSearch: '',
     error: '',
     metaColumns:[]
