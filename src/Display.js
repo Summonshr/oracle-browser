@@ -15,6 +15,18 @@ export default class Display extends React.Component {
         };
         this.getData = this.getData.bind(this);
         this.download = this.download.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this)
+        this.detect = this.detect.bind(this)
+    }
+
+    refi = React.createRef()
+
+    componentDidMount(){
+        window.addEventListener('scroll', this.detect, true);
+    }
+
+    detect(){
+        console.log(this.refi)
     }
 
     getData() {
@@ -115,7 +127,7 @@ export default class Display extends React.Component {
                 <div className="w-full overflow-x-scroll">
                     <table>
                         <thead>
-                            <tr>
+                            <tr  ref={this.refi}>
                                 {Object.keys(rows[0]).map(e => <th key={e} className="cursor-pointer do-not-select" onClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}
                             </tr>
                         </thead>
