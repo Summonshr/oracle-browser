@@ -31,12 +31,19 @@ export default class Display extends React.Component {
 
     getData() {
         let results = [...this.props.data];
+
+
+        if(results.length === 1) {
+            results = _.map(results[0],(VALUE,COLUMN)=>({COLUMN,VALUE}));
+        }
+
         if (this.state.orderBy.length > 0) {
             results = _.orderBy(results, (e) => {
                 let checker = e[this.state.orderBy] || 0;
                 return checker.toString().padStart(50, '0')
             }, this.state.order);
         }
+
         if (this.state.filter) {
             if (this.state.filter.indexOf('=') > -1 || this.state.filter.indexOf('<') > -1 || this.state.filter.indexOf('>') > -1) {
                 if (this.state.filter.indexOf('=') > -1) {
@@ -102,6 +109,7 @@ export default class Display extends React.Component {
     render() {
 
         let rows = this.getData();
+
         let length = rows.length;
 
         return <div className="flex w-full flex-wrap">
@@ -120,7 +128,7 @@ export default class Display extends React.Component {
                     <span>
                         <input disabled={this.props.data.length === 0} className="w-64 p-2 bg-grey-lighter mr-2" placeholder="filter the contents" onChange={this.setFilter.bind(this)} value={this.state.filter} />
                     </span>
-                    <a title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length == 0 ? () => alert('No rows available', 'error') : this.download}>⇓</a>
+                    <a title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length === 0 ? () => alert('No rows available', 'error') : this.download}>⇓</a>
                 </div>
             </div>
             {rows.length > 0 && <>
