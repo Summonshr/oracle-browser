@@ -1,5 +1,5 @@
 import React from 'react'
-import { PieChart, Cell, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Pie } from 'recharts';
+import { PieChart, Cell, Tooltip,  Pie } from 'recharts';
 import colors from './colors'
 
 const CustomTooltip = ({ active, payload, label }) => {

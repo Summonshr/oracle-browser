@@ -1,6 +1,8 @@
 import ReactPaginate from 'react-paginate';
 import React from 'react';
 import _ from 'lodash';
+import copy from 'copy-to-clipboard';
+
 export default class Display extends React.Component {
 
     constructor(props) {
@@ -15,18 +17,6 @@ export default class Display extends React.Component {
         };
         this.getData = this.getData.bind(this);
         this.download = this.download.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this)
-        this.detect = this.detect.bind(this)
-    }
-
-    refi = React.createRef()
-
-    componentDidMount(){
-        window.addEventListener('scroll', this.detect, true);
-    }
-
-    detect(){
-        console.log(this.refi)
     }
 
     getData() {
@@ -34,7 +24,7 @@ export default class Display extends React.Component {
 
 
         if(results.length === 1) {
-            results = _.map(results[0],(VALUE,COLUMN)=>({COLUMN,VALUE}));
+            results = _.map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
         }
 
         if (this.state.orderBy.length > 0) {
@@ -135,12 +125,12 @@ export default class Display extends React.Component {
                 <div className="w-full overflow-x-scroll">
                     <table>
                         <thead>
-                            <tr  ref={this.refi}>
-                                {Object.keys(rows[0]).map(e => <th key={e} className="cursor-pointer do-not-select" onClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}
+                            <tr>
+                                {Object.keys(rows[0]).map(e => <th key={e} onClick={()=>copy(e)} className="cursor-pointer do-not-select" onDoubleClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td key={i}>{(c[e] || '(NULL)').toString()}</td>)}</tr>)}
+                            {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td onClick={()=>copy((c[e] || '(NULL)').toString())} key={i}>{(c[e] || '(NULL)').toString()}</td>)}</tr>)}
                         </tbody>
                     </table>
                 </div>

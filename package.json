@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "codemirror": "^5.46.0",
+    "copy-to-clipboard": "^3.2.0",
     "lodash": "^4.17.11",
     "react": "^16.8.6",
     "react-codemirror2": "^6.0.0",
@@ -13,7 +14,8 @@
     "react-paginate": "^6.3.0",
     "react-s-alert": "^1.4.1",
     "react-scripts": "3.0.0",
-    "recharts": "^1.6.0"
+    "recharts": "^1.6.0",
+    "sql-formatter": "^2.3.3"
   },
   "scripts": {
     "start": "react-scripts start",

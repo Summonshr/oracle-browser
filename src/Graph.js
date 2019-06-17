@@ -7,18 +7,15 @@ let charts = {Bar, Pie, Line}
 
 export default class Graph extends React.Component {
     state = {type: 'Bar'}
-    constructor(props){
-        super(props)
-    }
 
     render(){
-        if(this.props.data.length == 0  || Object.keys(this.props.data[0]).length > 3){
+        if(this.props.data.length === 0  || Object.keys(this.props.data[0]).length > 3){
             return <div>At lease one column and not more than 3 is required.</div>
         }
 
         let keys = Object.keys(this.props.data[0])
 
-        if(keys.length == 1) {
+        if(keys.length === 1) {
             return <div>Display pie chart</div>
         }
 
