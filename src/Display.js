@@ -1,7 +1,7 @@
-import ReactPaginate from 'react-paginate';
-import React from 'react';
 import _ from 'lodash';
+import React from 'react';
 import copy from 'copy-to-clipboard';
+import ReactPaginate from 'react-paginate';
 
 export default class Display extends React.Component {
 
@@ -22,7 +22,7 @@ export default class Display extends React.Component {
     getData() {
         let results = [...this.props.data];
 
-
+        
         if(results.length === 1) {
             results = _.map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
         }
@@ -72,6 +72,7 @@ export default class Display extends React.Component {
                 });
             }
         }
+
         return results || [];
     }
 

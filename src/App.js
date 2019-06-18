@@ -14,7 +14,6 @@ const funcs = [
 	'load',
 	'fetch',
 	'getBody',
-	'setPageChange',
 	'downloadQuery',
 	'pushColumn',
 	'getColumns',
@@ -100,8 +99,8 @@ class App extends React.Component {
 
 		let query = this.state.query;
 
-		if(this.state.cache){
-			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ','SELECT /*+RESULT_CACHE*/ ')
+		if (this.state.cache) {
+			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ', 'SELECT /*+RESULT_CACHE*/ ')
 		}
 
 		Axios.post('http://localhost:3030/select', {
@@ -179,11 +178,6 @@ class App extends React.Component {
 		return results || [];
 	}
 
-	setPageChange(page) {
-		this.setState({
-			page: page.selected
-		})
-	}
 
 	pushColumn(column) {
 		let columns = this.state.metaColumns;
@@ -233,16 +227,13 @@ class App extends React.Component {
 						onBeforeChange={(editor, data, query) => {
 							this.setState({ query });
 						}}
-						onChange={(editor, data, value) => {
-
-						}}
 					/>
 					<div className="w-1/6 flex flex-wrap px-2">
 						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.downloadQuery}>⇓</a>
 						<a title="Display count" className="block cursor-pointer bg-green-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.getCount}>||̸||</a>
-						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2 " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={()=>{this.setState({cache: !this.state.cache})}}>🗲</a>
-						<a title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} href="/#" onClick={()=>{this.setState({show: this.state.show === 'graph' ? 'table' : 'graph'})}}>📊</a>
-						<a title={'Format'} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} href="/#" onClick={()=>{this.setState({query: sqlFormatter.format(this.state.query)})}}>Ḟ</a>
+						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2 " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={() => { this.setState({ cache: !this.state.cache }) }}>🗲</a>
+						<a title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} href="/#" onClick={() => { this.setState({ show: this.state.show === 'graph' ? 'table' : 'graph' }) }}>📊</a>
+						<a title={'Format'} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} href="/#" onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</a>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -253,15 +244,15 @@ class App extends React.Component {
 				</div>}
 				{!this.state.loading && this.state.error && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
 					<span className="p-4 text-red-darker">
-                		{this.state.error}
+						{this.state.error}
 					</span>
 				</div>}
-				{!this.state.loading &&  !this.state.error && this.state.rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
+				{!this.state.loading && !this.state.error && this.state.rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
 					<span className="p-4 text-red-darker">
-                		No rows matched
+						No rows matched
 					</span>
 				</div>}
-				{!this.state.loading &&  !this.state.error && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display data={this.getBody()} /> : <Graph data={this.getBody()} />)}
+				{!this.state.loading && !this.state.error && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display data={this.getBody()} /> : <Graph data={this.getBody()} />)}
 			</div>
 		</div>
 	}
