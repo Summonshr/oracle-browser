@@ -1,15 +1,16 @@
+import _ from 'lodash';
 import React from 'react';
 import Axios from 'axios';
-import ReactLoading from 'react-loading';
-import _ from 'lodash';
-import Display from './Display';
 import Graph from './Graph';
+import Display from './Display';
+import 'codemirror/mode/sql/sql';
 import { initial } from './config.js';
-import { Controlled as CodeMirror } from 'react-codemirror2'
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
-import 'codemirror/mode/sql/sql';
+import ReactLoading from 'react-loading';
 import sqlFormatter from "sql-formatter";
+import { Controlled as CodeMirror } from 'react-codemirror2'
+import { highlightTrailingWhitespace } from 'jest-matcher-utils';
 const funcs = [
 	'load',
 	'fetch',
@@ -18,6 +19,7 @@ const funcs = [
 	'pushColumn',
 	'getColumns',
 	'getCount',
+	'format',
 	'showLoading',
 	'hideLoading',
 	'componentDidUpdate',
@@ -63,6 +65,16 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
+		if(window) {
+			window.onkeydown = (e)=>{
+				if(e.ctrlKey && e.shiftKey && e.code == 'KeyZ') {
+					this.getCount();
+				}
+				if(e.ctrlKey && e.altKey && e.code == 'KeyF') {
+					this.format();
+				}
+			}
+		}
 		local && this.setState({
 			...local,
 			loading: false,
@@ -199,6 +211,10 @@ class App extends React.Component {
 		return meta;
 	}
 
+	format(){
+		this.setState({ query: sqlFormatter.format(this.state.query) })
+	}
+
 	render() {
 		return <div className="w-full mx-auto flex flex-wrap relative">
 			<div className="w-1/6 p-2 border-r border-grey-light h-screen overflow-y-auto">
@@ -209,7 +225,7 @@ class App extends React.Component {
 					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"w-full cursor-pointer flex flex-wrap justify-between " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')}><a className="p-2 block no-underline text-grey-darker flex-grow" href="#" onClick={() => this.pushColumn(e)}>{e}</a></li>)}
 				</ul>
 			</div>
-			<div className="w-5/6 p-2 h-32 h-screen overflow-y-auto">
+			<div className="w-5/6 p-2 h-48 h-screen overflow-y-auto">
 				<div className="w-full flex flex-wrap justify-between">
 					<CodeMirror
 						className="w-5/6"

@@ -22,7 +22,7 @@ export default class Display extends React.Component {
     getData() {
         let results = [...this.props.data];
 
-        
+
         if(results.length === 1) {
             results = _.map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
         }

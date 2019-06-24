@@ -50,6 +50,5 @@ window.queryForDownload = function (url, data) {
 
 setTimeout(() => {
 ReactDOM.render(<> {window.location.pathname === '/schema-browser' ? <Schema /> : <App /> } <Alert offset={50} position={'top-right'} stack={false} /></>, document.getElementById('root'));
-
     serviceWorker.unregister();
 }, 100)
