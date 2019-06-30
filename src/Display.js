@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import map from 'lodash/map';
+import orderBy from 'lodash/orderBy';
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import ReactPaginate from 'react-paginate';
