@@ -10,7 +10,6 @@ import 'codemirror/theme/material.css';
 import ReactLoading from 'react-loading';
 import sqlFormatter from "sql-formatter";
 import { Controlled as CodeMirror } from 'react-codemirror2'
-import { highlightTrailingWhitespace } from 'jest-matcher-utils';
 const funcs = [
 	'load',
 	'fetch',
@@ -115,9 +114,16 @@ class App extends React.Component {
 			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ', 'SELECT /*+RESULT_CACHE*/ ')
 		}
 
+
 		Axios.post('http://localhost:3030/select', {
 			query
 		}, { cancelToken: attempt.token }).then(res => {
+			if(res.data.rowsAffected) {
+				this.hideLoading()
+				alert('Total Rows effected:' + res.data.rowsAffected)
+				attempt = false;
+				return;
+			}
 			this.setState({
 				...initial,
 				initial: false,
@@ -225,14 +231,14 @@ class App extends React.Component {
 					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"w-full cursor-pointer flex flex-wrap justify-between " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')}><a className="p-2 block no-underline text-grey-darker flex-grow" href="#" onClick={() => this.pushColumn(e)}>{e}</a></li>)}
 				</ul>
 			</div>
-			<div className="w-5/6 p-2 h-48 h-screen overflow-y-auto">
+			<div className="w-5/6 p-2 h-64 h-screen overflow-y-auto">
 				<div className="w-full flex flex-wrap justify-between">
 					<CodeMirror
 						className="w-5/6"
 						options={{
 							mode: 'sql',
 							theme: 'material',
-							lineNumbers: true
+							lineNumbers: true,
 						}}
 						value={this.state.query}
 						onKeyUp={(editor, e, value) => {
@@ -241,7 +247,8 @@ class App extends React.Component {
 							}
 						}}
 						onBeforeChange={(editor, data, query) => {
-							this.setState({ query });
+							console.log(editor)
+							this.setState({ query, total_lines: editor.getDoc.size });
 						}}
 					/>
 					<div className="w-1/6 flex flex-wrap px-2">

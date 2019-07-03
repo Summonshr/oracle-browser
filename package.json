@@ -9,6 +9,7 @@
     "lodash": "^4.17.11",
     "react": "^16.8.6",
     "react-codemirror2": "^6.0.0",
+    "react-debounce-input": "^3.2.0",
     "react-dom": "^16.8.6",
     "react-loading": "^2.0.3",
     "react-paginate": "^6.3.0",

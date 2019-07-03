@@ -4,6 +4,7 @@ import orderBy from 'lodash/orderBy';
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import ReactPaginate from 'react-paginate';
+import {DebounceInput} from 'react-debounce-input';
 
 export default class Display extends React.Component {
 
@@ -24,13 +25,12 @@ export default class Display extends React.Component {
     getData() {
         let results = [...this.props.data];
 
-
         if(results.length === 1) {
-            results = _.map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
+            results = map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
         }
 
         if (this.state.orderBy.length > 0) {
-            results = _.orderBy(results, (e) => {
+            results = orderBy(results, (e) => {
                 let checker = e[this.state.orderBy] || 0;
                 return checker.toString().padStart(50, '0')
             }, this.state.order);
@@ -119,7 +119,15 @@ export default class Display extends React.Component {
                 </div>
                 <div className="flex">
                     <span>
-                        <input disabled={this.props.data.length === 0} className="w-64 p-2 bg-grey-lighter mr-2" placeholder="filter the contents" onChange={this.setFilter.bind(this)} value={this.state.filter} />
+                    <DebounceInput
+                        className="w-64 p-2 bg-grey-lighter mr-2"
+                        placeholder="filter the contents"
+                        minLength={2}
+                        disabled={this.props.data.length === 0}
+                        debounceTimeout={300}
+                        onChange={this.setFilter.bind(this)}
+                        value={this.state.filter}
+                        />
                     </span>
                     <a title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length === 0 ? () => alert('No rows available', 'error') : this.download}>⇓</a>
                 </div>
@@ -158,5 +166,4 @@ export default class Display extends React.Component {
                 {'No rows matched.'}</span></div>}
         </div>
     }
-
 }

@@ -22,7 +22,7 @@ body {
 }
 
 .CodeMirror {
-  height: 135px !important;
+  height: 250px !important;
 }
 
 .CodeMirror-code>div {

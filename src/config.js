@@ -10,6 +10,7 @@ export const initial = {
     reload: false,
     metaSearch: '',
     error: '',
+    total_lines: 0,
     metaColumns:[]
 }
 
