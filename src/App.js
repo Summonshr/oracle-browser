@@ -50,7 +50,8 @@ class App extends React.Component {
 			initial: true,
 			query: 'select * from tbaadm.gam',
 			cache: false,
-			offset: false
+			offset: false,
+			onLoop:false
 		};
 
 		funcs.filter(f => {
@@ -66,18 +67,27 @@ class App extends React.Component {
 	componentDidMount() {
 		if(window) {
 			window.onkeydown = (e)=>{
-				if(e.ctrlKey && e.shiftKey && e.code == 'KeyZ') {
+				if(e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {
 					this.getCount();
 				}
-				if(e.ctrlKey && e.altKey && e.code == 'KeyF') {
+				if(e.ctrlKey && e.altKey && e.code === 'KeyF') {
 					this.format();
 				}
 			}
 		}
+
 		local && this.setState({
 			...local,
 			loading: false,
 		});
+
+		let temper = ()=>{
+			this.state.onLoop && this.fetch();
+		}
+
+		setInterval(temper, 30000)
+
+		local && local.onLoop && setTimeout(this.fetch, 5)
 	}
 
 	load(event) {
@@ -228,7 +238,7 @@ class App extends React.Component {
 					<li className="w-full mb-1 flex justify-between">
 						<input className="p-2 border-b-2 w-full outline-none" placeholder="Filter columns" value={this.state.metaSearch} onChange={e => this.setState({ metaSearch: e.target.value })} />
 					</li>
-					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"w-full cursor-pointer flex flex-wrap justify-between " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')}><a className="p-2 block no-underline text-grey-darker flex-grow" href="#" onClick={() => this.pushColumn(e)}>{e}</a></li>)}
+					{this.state.metaData.length > 0 && this.getColumns().map(e => <li key={e} className={"w-full cursor-pointer flex flex-wrap justify-between " + (this.state.metaColumns.includes(e) ? 'bg-green-lighter text-green-darkest' : '')}><button className="p-2 block no-underline text-grey-darker flex-grow text-left" onClick={() => this.pushColumn(e)}>{e}</button></li>)}
 				</ul>
 			</div>
 			<div className="w-5/6 p-2 h-64 h-screen overflow-y-auto">
@@ -247,16 +257,16 @@ class App extends React.Component {
 							}
 						}}
 						onBeforeChange={(editor, data, query) => {
-							console.log(editor)
 							this.setState({ query, total_lines: editor.getDoc.size });
 						}}
 					/>
 					<div className="w-1/6 flex flex-wrap px-2">
-						<a title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.downloadQuery}>⇓</a>
-						<a title="Display count" className="block cursor-pointer bg-green-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" href="/#" onClick={this.getCount}>||̸||</a>
-						<a title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2 " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} href="/#" onClick={() => { this.setState({ cache: !this.state.cache }) }}>🗲</a>
-						<a title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} href="/#" onClick={() => { this.setState({ show: this.state.show === 'graph' ? 'table' : 'graph' }) }}>📊</a>
-						<a title={'Format'} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} href="/#" onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</a>
+						<button title="Download by query" className="block cursor-pointer bg-blue-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" onClick={this.downloadQuery}>⇓</button>
+						<button title="Display count" className="block cursor-pointer bg-green-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" onClick={this.getCount}>||̸||</button>
+						<button title={'Cache Status: ' + (this.state.cache ? 'ON' : 'OFF')} className={"block cursor-pointer bg-red-light text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2 " + (this.state.cache ? 'bg-teal-light' : 'bg-red-light')} onClick={() => { this.setState({ cache: !this.state.cache }) }}>🗲</button>
+						<button title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} onClick={() => { this.setState({ show: this.state.show === 'graph' ? 'table' : 'graph' }) }}><span role="img" aria-label="WORKING">📊</span></button>
+						<button title='Format' className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</button>
+						<button title='Loop' className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.onLoop ? 'bg-blue-dark text-white' : 'bg-blue-lighter text-grey-darker')} onClick={() => { this.setState({ onLoop: !this.state.onLoop }) }}><span className={this.state.onLoop ? "spin" : ""}>✴</span></button>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -265,9 +275,11 @@ class App extends React.Component {
 						<ReactLoading type='bubbles' color='red' />
 					</div>
 				</div>}
-				{!this.state.loading && this.state.error && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
+				{!this.state.loading && this.state.error && <div className="h-auto w-full bg-red-lightest flex items-center overflow-hidden">
 					<span className="p-4 text-red-darker">
 						{this.state.error}
+						<br/>
+						{this.state.query}
 					</span>
 				</div>}
 				{!this.state.loading && !this.state.error && this.state.rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">

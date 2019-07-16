@@ -11,6 +11,8 @@ import Axios from 'axios';
 import Alert from 'react-s-alert';
 import 'react-s-alert/dist/s-alert-default.css';
 import 'react-s-alert/dist/s-alert-css-effects/slide.css';
+import { BrowserRouter as Router, Route } from "react-router-dom";
+
 window.alert = function(message, type = 'info'){
     Alert[type](message)
 }
@@ -48,7 +50,19 @@ window.queryForDownload = function (url, data) {
         });
 }
 
+function AppRouter() {
+    return (
+      <Router>
+          <Route path="/schema-browser" exact component={Schema} />
+          <Route path="/" component={App} />
+          <Alert offset={50} position={'top-right'} stack={false} />
+      </Router>
+    );
+  }
+
+  export default AppRouter;
+
 setTimeout(() => {
-ReactDOM.render(<> {window.location.pathname === '/schema-browser' ? <Schema /> : <App /> } <Alert offset={50} position={'top-right'} stack={false} /></>, document.getElementById('root'));
+ReactDOM.render(<AppRouter/>, document.getElementById('root'));
     serviceWorker.unregister();
 }, 100)

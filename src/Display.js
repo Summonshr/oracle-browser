@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import map from 'lodash/map';
 import orderBy from 'lodash/orderBy';
 import React from 'react';
@@ -129,7 +128,7 @@ export default class Display extends React.Component {
                         value={this.state.filter}
                         />
                     </span>
-                    <a title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length === 0 ? () => alert('No rows available', 'error') : this.download}>⇓</a>
+                    <button title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length === 0 ? () => alert('No rows available', 'error') : this.download}>⇓</button>
                 </div>
             </div>
             {rows.length > 0 && <>
