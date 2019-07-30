@@ -9,7 +9,8 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import ReactLoading from 'react-loading';
 import sqlFormatter from "sql-formatter";
-import { Controlled as CodeMirror } from 'react-codemirror2'
+import { Controlled as CodeMirror } from 'react-codemirror2';
+
 const funcs = [
 	'load',
 	'fetch',
@@ -23,7 +24,7 @@ const funcs = [
 	'hideLoading',
 	'componentDidUpdate',
 	'componentDidMount',
-]
+];
 
 let attempt = false;
 
@@ -128,7 +129,7 @@ class App extends React.Component {
 		Axios.post('http://localhost:3030/select', {
 			query
 		}, { cancelToken: attempt.token }).then(res => {
-			if(res.data.rowsAffected) {
+			if(res.data.rowsAffected == 0 || res.data.rowsAffected) {
 				this.hideLoading()
 				alert('Total Rows effected:' + res.data.rowsAffected)
 				attempt = false;

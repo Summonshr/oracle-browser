@@ -1,9 +1,10 @@
 import map from 'lodash/map';
+import endsWith from 'lodash/endsWith';
 import orderBy from 'lodash/orderBy';
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import ReactPaginate from 'react-paginate';
-import {DebounceInput} from 'react-debounce-input';
+import { DebounceInput } from 'react-debounce-input';
 
 export default class Display extends React.Component {
 
@@ -24,8 +25,8 @@ export default class Display extends React.Component {
     getData() {
         let results = [...this.props.data];
 
-        if(results.length === 1) {
-            results = map(results[0], (VALUE,COLUMN)=>({COLUMN,VALUE}));
+        if (results.length === 1) {
+            results = map(results[0], (VALUE, COLUMN) => ({ COLUMN, VALUE }));
         }
 
         if (this.state.orderBy.length > 0) {
@@ -118,14 +119,14 @@ export default class Display extends React.Component {
                 </div>
                 <div className="flex">
                     <span>
-                    <DebounceInput
-                        className="w-64 p-2 bg-grey-lighter mr-2"
-                        placeholder="filter the contents"
-                        minLength={2}
-                        disabled={this.props.data.length === 0}
-                        debounceTimeout={300}
-                        onChange={this.setFilter.bind(this)}
-                        value={this.state.filter}
+                        <DebounceInput
+                            className="w-64 p-2 bg-grey-lighter mr-2"
+                            placeholder="filter the contents"
+                            minLength={2}
+                            disabled={this.props.data.length === 0}
+                            debounceTimeout={300}
+                            onChange={this.setFilter.bind(this)}
+                            value={this.state.filter}
                         />
                     </span>
                     <button title="Download this table" className="block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center" href="#" onClick={this.props.data.length === 0 ? () => alert('No rows available', 'error') : this.download}>⇓</button>
@@ -136,11 +137,11 @@ export default class Display extends React.Component {
                     <table>
                         <thead>
                             <tr>
-                                {Object.keys(rows[0]).map(e => <th key={e} onClick={()=>copy(e)} className="cursor-pointer do-not-select" onDoubleClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}
+                                {Object.keys(rows[0]).map(e => <th key={e} onClick={() => copy(e)} className="cursor-pointer do-not-select" onDoubleClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td onClick={()=>copy((c[e] || '(NULL)').toString())} key={i}>{(c[e] || '(NULL)').toString()}</td>)}</tr>)}
+                            {rows.splice(this.state.page * this.state.no_of_rows, this.state.no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td onClick={() => copy(String(c[e]))} key={i}>{String((endsWith(e, '_DATE') || endsWith(e, '_TIME')) ? [(new Date(c[e])).toLocaleDateString(), (new Date(c[e]).toLocaleTimeString())].filter(e => !['5:30:00 AM', '00:00:00 AM', '12:00:00 AM'].includes(e)).join(' ') : c[e])}</td>)}</tr>)}
                         </tbody>
                     </table>
                 </div>
