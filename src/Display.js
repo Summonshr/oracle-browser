@@ -99,6 +99,7 @@ export default class Display extends React.Component {
         this.queryForDownload('http://localhost:3030/excel', { data: this.getData() })
     }
 
+
     render() {
 
         let rows = this.getData();
@@ -134,7 +135,7 @@ export default class Display extends React.Component {
             </div>
             {rows.length > 0 && <>
                 <div className="w-full overflow-x-scroll">
-                    <table>
+                    <table className={this.props.live ? 'live-database' : 'cus-database'}>
                         <thead>
                             <tr>
                                 {Object.keys(rows[0]).map(e => <th key={e} onClick={() => copy(e)} className="cursor-pointer do-not-select" onDoubleClick={() => this.setState({ orderBy: e, order: this.state.order === 'desc' ? 'asc' : 'desc' })}>{e}</th>)}

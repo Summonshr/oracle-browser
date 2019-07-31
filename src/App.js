@@ -52,7 +52,8 @@ class App extends React.Component {
 			query: 'select * from tbaadm.gam',
 			cache: false,
 			offset: false,
-			onLoop:false
+			live: false,
+			onLoop: false
 		};
 
 		funcs.filter(f => {
@@ -66,12 +67,16 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		if(window) {
-			window.onkeydown = (e)=>{
-				if(e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {
+		if (window) {
+			window.onkeydown = (e) => {
+				if (e.ctrlKey && e.shiftKey && e.code === 'KeyZ') {
 					this.getCount();
 				}
-				if(e.ctrlKey && e.altKey && e.code === 'KeyF') {
+				if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
+					alert('Switched to ' + (!this.state.live ? 'LIVE' : 'CUS'))
+					this.setState({live: !this.state.live});
+				}
+				if (e.ctrlKey && e.altKey && e.code === 'KeyF') {
 					this.format();
 				}
 			}
@@ -82,7 +87,7 @@ class App extends React.Component {
 			loading: false,
 		});
 
-		let temper = ()=>{
+		let temper = () => {
 			this.state.onLoop && this.fetch();
 		}
 
@@ -108,7 +113,7 @@ class App extends React.Component {
 	queryForDownload = window.queryForDownload.bind(this)
 
 	downloadQuery() {
-		this.queryForDownload('http://localhost:3030/excel-query', { query: this.state.query, columns: this.state.metaColumns })
+		this.queryForDownload('http://localhost:' + (this.state.live ? '3031' : '3030') + '/excel-query', { query: this.state.query, columns: this.state.metaColumns })
 	}
 
 	fetch() {
@@ -126,10 +131,10 @@ class App extends React.Component {
 		}
 
 
-		Axios.post('http://localhost:3030/select', {
+		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/select', {
 			query
 		}, { cancelToken: attempt.token }).then(res => {
-			if(res.data.rowsAffected == 0 || res.data.rowsAffected) {
+			if (res.data.rowsAffected == 0 || res.data.rowsAffected) {
 				this.hideLoading()
 				alert('Total Rows effected:' + res.data.rowsAffected)
 				attempt = false;
@@ -159,7 +164,7 @@ class App extends React.Component {
 
 		attempt = Axios.CancelToken.source();
 
-		Axios.post('http://localhost:3030/select', {
+		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/select', {
 			query: `select count(1) count from ( ${this.state.query} )`
 		}, { cancelToken: attempt.token }).then(res => {
 			alert('Total rows: ' + res.data.rows[0].COUNT)
@@ -207,7 +212,6 @@ class App extends React.Component {
 		return results || [];
 	}
 
-
 	pushColumn(column) {
 		let columns = this.state.metaColumns;
 		if (columns.includes(column)) {
@@ -228,11 +232,12 @@ class App extends React.Component {
 		return meta;
 	}
 
-	format(){
+	format() {
 		this.setState({ query: sqlFormatter.format(this.state.query) })
 	}
 
 	render() {
+		const { live } = this.state;
 		return <div className="w-full mx-auto flex flex-wrap relative">
 			<div className="w-1/6 p-2 border-r border-grey-light h-screen overflow-y-auto">
 				<ul className="list-reset ">
@@ -268,6 +273,7 @@ class App extends React.Component {
 						<button title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} onClick={() => { this.setState({ show: this.state.show === 'graph' ? 'table' : 'graph' }) }}><span role="img" aria-label="WORKING">📊</span></button>
 						<button title='Format' className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</button>
 						<button title='Loop' className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.onLoop ? 'bg-blue-dark text-white' : 'bg-blue-lighter text-grey-darker')} onClick={() => { this.setState({ onLoop: !this.state.onLoop }) }}><span className={this.state.onLoop ? "spin" : ""}>✴</span></button>
+						<button title={live ? 'Live Database' : 'CUS Database'} className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (live ? 'bg-orange-dark text-white' : 'bg-purple-lighter text-purple-darker')} onClick={() => { this.setState({ live: !live }) }}>{live? 'L' : 'C'}</button>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
@@ -279,7 +285,7 @@ class App extends React.Component {
 				{!this.state.loading && this.state.error && <div className="h-auto w-full bg-red-lightest flex items-center overflow-hidden">
 					<span className="p-4 text-red-darker">
 						{this.state.error}
-						<br/>
+						<br />
 						{this.state.query}
 					</span>
 				</div>}
@@ -288,7 +294,7 @@ class App extends React.Component {
 						No rows matched
 					</span>
 				</div>}
-				{!this.state.loading && !this.state.error && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display data={this.getBody()} /> : <Graph data={this.getBody()} />)}
+				{!this.state.loading && !this.state.error && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display live={live} data={this.getBody()} /> : <Graph data={this.getBody()} />)}
 			</div>
 		</div>
 	}

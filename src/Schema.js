@@ -46,7 +46,6 @@ class Schema extends React.Component {
         Axios.post('http://localhost:3030/select', {
             query: "SELECT distinct owner FROM all_tab_cols"
         }).then(res => {
-            console.log(res.data)
             this.setState({
                 schemas: res.data.rows,
                 tables: []
