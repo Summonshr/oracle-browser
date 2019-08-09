@@ -25,7 +25,7 @@ export default class BarCharts extends React.Component {
             {this.props.keys.splice(1, this.props.keys.length - 1).map((e, i) => {
                 let data = this.props.data.map(d=>{
                     return {
-                        [main]: 'Sol Id: ' + d[main],
+                        [main]: d[main],
                         [e]: d[e]
                     }
                 })

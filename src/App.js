@@ -24,6 +24,9 @@ const funcs = [
 	'hideLoading',
 	'componentDidUpdate',
 	'componentDidMount',
+	'commit',
+	'rollback',
+	'refresh',
 ];
 
 let attempt = false;
@@ -236,6 +239,40 @@ class App extends React.Component {
 		this.setState({ query: sqlFormatter.format(this.state.query) })
 	}
 
+	commit(){
+		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/commit', {
+		}).then(res => {
+			alert('Commit Successful')
+		}).catch((err) => {
+			if (!Axios.isCancel(err)) {
+				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+			}
+		})
+	}
+
+	rollback(){
+		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/rollback', {
+		}).then(res => {
+			alert('Rollback Successful')
+		}).catch((err) => {
+			if (!Axios.isCancel(err)) {
+				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+			}
+		})
+	}
+
+
+	refresh(){
+		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/refresh', {
+		}).then(res => {
+			alert('Refresh completed')
+		}).catch((err) => {
+			if (!Axios.isCancel(err)) {
+				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+			}
+		})
+	}
+
 	render() {
 		const { live } = this.state;
 		return <div className="w-full mx-auto flex flex-wrap relative">
@@ -274,6 +311,9 @@ class App extends React.Component {
 						<button title='Format' className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</button>
 						<button title='Loop' className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.onLoop ? 'bg-blue-dark text-white' : 'bg-blue-lighter text-grey-darker')} onClick={() => { this.setState({ onLoop: !this.state.onLoop }) }}><span className={this.state.onLoop ? "spin" : ""}>✴</span></button>
 						<button title={live ? 'Live Database' : 'CUS Database'} className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (live ? 'bg-orange-dark text-white' : 'bg-purple-lighter text-purple-darker')} onClick={() => { this.setState({ live: !live }) }}>{live? 'L' : 'C'}</button>
+						<button onClick={this.commit} className="block cursor-pointer bg-green text-green-lightest text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Commit">✓</button>
+						<button onClick={this.rollback} className="block cursor-pointer bg-red-light text-red-darkest w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Rollback">⎌</button>
+						<button onClick={this.refresh} className="block cursor-pointer bg-indigo-light text-indigo-darkest w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Refresh">↺</button>
 					</div>
 				</div>
 				<div className="border-2 border-grey-darkest my-4"></div>
