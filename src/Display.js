@@ -146,7 +146,7 @@ export default class Display extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.splice(page * no_of_rows, no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td onClick={() => copy(String(c[e]))} key={i}>{String((endsWith(e, '_DATE') || endsWith(e, '_TIME')) ? [(new Date(c[e])).toLocaleDateString(), (new Date(c[e]).toLocaleTimeString())].filter(e => !['5:30:00 AM', '00:00:00 AM', '12:00:00 AM','1/1/1970'].includes(e)).join(' ') : c[e])}</td>)}</tr>)}
+                            {rows.splice(page * no_of_rows, no_of_rows).map((c, i) => <tr key={i}>{Object.keys(c).map((e, i) => <td onClick={() => copy(String(c[e]))} key={i}>{(endsWith(e, 'DATE') || endsWith(e, 'DOB') ? [(new Date(c[e])).toLocaleDateString(), (new Date(c[e]).toLocaleTimeString())].filter(e => !['5:30:00 AM', '00:00:00 AM', '12:00:00 AM','1/1/1970'].includes(e)).join(' ') : c[e])}</td>)}</tr>)}
                         </tbody>
                     </table>
                 </div>

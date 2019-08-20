@@ -77,7 +77,7 @@ class App extends React.Component {
 				}
 				if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
 					alert('Switched to ' + (!this.state.live ? 'LIVE' : 'CUS'))
-					this.setState({live: !this.state.live});
+					this.setState({ live: !this.state.live });
 				}
 				if (e.ctrlKey && e.altKey && e.code === 'KeyF') {
 					this.format();
@@ -94,15 +94,13 @@ class App extends React.Component {
 			this.state.onLoop && this.fetch();
 		}
 
-		setInterval(temper, 30000)
+		setInterval(temper, 30000);
 
-		local && local.onLoop && setTimeout(this.fetch, 5)
+		local && local.onLoop && setTimeout(this.fetch, 5);
 	}
 
 	load(event) {
-		this.setState({
-			query: event.target.value
-		});
+		this.setState({ query: event.target.value });
 	}
 
 	showLoading() {
@@ -133,7 +131,6 @@ class App extends React.Component {
 			query = query.replace('select ', 'select /*+RESULT_CACHE*/ ').replace('SELECT ', 'SELECT /*+RESULT_CACHE*/ ')
 		}
 
-
 		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/select', {
 			query
 		}, { cancelToken: attempt.token }).then(res => {
@@ -146,7 +143,7 @@ class App extends React.Component {
 			this.setState({
 				...initial,
 				initial: false,
-				rows: res.data.rows,
+				rows: res.data.rows || [],
 				show: this.state.show,
 				metaColumns: [],
 				metaData: _.uniqBy(res.data.metaData, 'name'),
@@ -156,6 +153,8 @@ class App extends React.Component {
 		}).catch((err) => {
 			if (!Axios.isCancel(err)) {
 				err.response && this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
+			} else {
+				this.setState({ loading: false, initial: false, rows: [], error: err.response.data.error })
 			}
 		})
 	}
@@ -239,7 +238,7 @@ class App extends React.Component {
 		this.setState({ query: sqlFormatter.format(this.state.query) })
 	}
 
-	commit(){
+	commit() {
 		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/commit', {
 		}).then(res => {
 			alert('Commit Successful')
@@ -250,7 +249,7 @@ class App extends React.Component {
 		})
 	}
 
-	rollback(){
+	rollback() {
 		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/rollback', {
 		}).then(res => {
 			alert('Rollback Successful')
@@ -262,7 +261,7 @@ class App extends React.Component {
 	}
 
 
-	refresh(){
+	refresh() {
 		Axios.post('http://localhost:' + (this.state.live ? '3031' : '3030') + '/refresh', {
 		}).then(res => {
 			alert('Refresh completed')
@@ -310,9 +309,13 @@ class App extends React.Component {
 						<button title={'Graph: ' + (this.state.show === 'graph' ? 'ON' : 'OFF')} className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.show === 'graph' ? 'bg-grey-darker' : 'bg-grey-lightest')} onClick={() => { this.setState({ show: this.state.show === 'graph' ? 'table' : 'graph' }) }}><span role="img" aria-label="WORKING">📊</span></button>
 						<button title='Format' className={"block cursor-pointer text-white w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 bg-teal-darker"} onClick={() => { this.setState({ query: sqlFormatter.format(this.state.query) }) }}>Ḟ</button>
 						<button title='Loop' className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (this.state.onLoop ? 'bg-blue-dark text-white' : 'bg-blue-lighter text-grey-darker')} onClick={() => { this.setState({ onLoop: !this.state.onLoop }) }}><span className={this.state.onLoop ? "spin" : ""}>✴</span></button>
-						<button title={live ? 'Live Database' : 'CUS Database'} className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (live ? 'bg-orange-dark text-white' : 'bg-purple-lighter text-purple-darker')} onClick={() => { this.setState({ live: !live }) }}>{live? 'L' : 'C'}</button>
-						<button onClick={this.commit} className="block cursor-pointer bg-green text-green-lightest text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Commit">✓</button>
-						<button onClick={this.rollback} className="block cursor-pointer bg-red-light text-red-darkest w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Rollback">⎌</button>
+						<button title={live ? 'Live Database' : 'CUS Database'} className={"block cursor-pointer w-8 h-8 flex flex-wrap justify-center items-center no-underline mr-2 " + (live ? 'bg-orange-dark text-white' : 'bg-purple-lighter text-purple-darker')} onClick={() => { this.setState({ live: !live }) }}>{live ? 'L' : 'C'}</button>
+						{
+							!live && <>
+								<button onClick={this.commit} className="block cursor-pointer bg-green text-green-lightest text-white w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Commit">✓</button>
+								<button onClick={this.rollback} className="block cursor-pointer bg-red-light text-red-darkest w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Rollback">⎌</button>
+							</>
+						}
 						<button onClick={this.refresh} className="block cursor-pointer bg-indigo-light text-indigo-darkest w-8 h-8 flex flex-wrap justify-center items-center mr-2" title="Refresh">↺</button>
 					</div>
 				</div>
@@ -329,12 +332,12 @@ class App extends React.Component {
 						{this.state.query}
 					</span>
 				</div>}
-				{!this.state.loading && !this.state.error && this.state.rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
+				{!this.state.loading && !this.state.error && this.state.rows && this.state.rows.length === 0 && <div className="h-8 w-full bg-red-lightest flex items-center overflow-hidden">
 					<span className="p-4 text-red-darker">
 						No rows matched
 					</span>
 				</div>}
-				{!this.state.loading && !this.state.error && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display live={live} data={this.getBody()} /> : <Graph data={this.getBody()} />)}
+				{!this.state.loading && !this.state.error && this.state.rows && this.state.rows.length > 0 && (this.state.show === 'table' ? <Display live={live} data={this.getBody()} /> : <Graph data={this.getBody()} />)}
 			</div>
 		</div>
 	}

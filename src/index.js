@@ -60,6 +60,10 @@ function AppRouter() {
     );
 }
 
+Object.prototype.toString = function(){
+    return JSON.stringify(this)
+}
+
 export default AppRouter;
 
 setTimeout(() => {
