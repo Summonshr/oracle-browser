@@ -19,3 +19,6 @@ Following features are supported
 - [X] Save each query per each tab
 - [X] Filter current data based upon  >, = >=, <=
 - [X] Paginated data
+
+
+Contact me @ [LinkedIn](https://www.linkedin.com/in/suman-shresth)
