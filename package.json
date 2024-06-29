@@ -17,7 +17,7 @@
     "react-s-alert": "^1.4.1",
     "react-scripts": "3.0.0",
     "react-window": "^1.8.3",
-    "recharts": "^1.6.0",
+    "recharts": "^1.8.6",
     "sql-formatter": "^2.3.3"
   },
   "scripts": {
